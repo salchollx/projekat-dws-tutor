@@ -1,111 +1,179 @@
+/* 1. Definisanje varijabli - Tvoja paleta boja i fontovi */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* Boje - Edukativna i profesionalna paleta */
+  --primary-color: #2563eb;       /* Royal Blue - za glavne akcije */
+  --primary-hover: #1d4ed8;
+  --secondary-color: #64748b;     /* Slate - za manje bitne elemente */
+  --accent-color: #f59e0b;        /* Amber - za highlight/upozorenja */
+  
+  /* Neutralne boje */
+  --bg-color: #f8fafc;
+  --text-main: #1e293b;
+  --text-muted: #475569;
+  --white: #ffffff;
+  --border-color: #e2e8f0;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  /* Fontovi */
+  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Poppins', sans-serif; /* Za naslove */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-body {
+/* 2. Osnovni Reset */
+* {
   margin: 0;
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+  padding: 0;
   box-sizing: border-box;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+body {
+  font-family: var(--font-main);
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+/* 3. Tipografija */
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
+
+h1 { font-size: 2.5rem; color: var(--text-main); }
+h2 { font-size: 2rem; color: var(--text-main); }
+h3 { font-size: 1.5rem; color: var(--text-muted); }
+
 p {
-  margin: 0;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
 }
 
-code,
-.counter {
-  font-family: var(--mono);
+/* 4. Dugmad (Buttons) */
+.btn {
   display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-family: var(--font-main);
+  text-decoration: none;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+  background-color: #eff6ff;
+}
+
+/* 5. Utility klase (Pomoćne klase) */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.text-center { text-align: center; }
+.mt-4 { margin-top: 2rem; }
+
+input::placeholder, 
+textarea::placeholder,
+select:invalid {
+  font-family: var(--font-main); /* Koristi tvoj definisani font */
+  font-style: normal;            /* Često se koristi da se razlikuje od unesenog teksta */
+  color: #94a3b8;                /* Svijetlija siva (Slate 400) */
+  font-size: 14px;               /* Možeš ga malo smanjiti u odnosu na pravi tekst */
+  letter-spacing: 0.5px;         /* Malo razmaka za moderniji izgled */
+  opacity: 1;                    /* Osigurava da boja bude ista u svim browserima */
+}
+
+/* Stil kada korisnik klikne na polje (da placeholder nestane ili promijeni boju) */
+input:focus::placeholder {
+  color: #cbd5e1;                /* Još svjetlije kada je polje aktivno */
+  transition: color 0.2s ease;
+}
+
+select {
+  appearance: none; /* Uklanja defaultnu sistemsku strelicu */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 16px;
+  font-family: var(--font-main);
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-main);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+
+  /* Dodajemo našu strelicu kao background sliku (SVG) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px;
+}
+
+/* Stil kada je polje fokusirano */
+select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Stil za placeholder efekat (dok ništa nije izabrano) */
+select:invalid {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* Da opcije unutar menija izgledaju normalno */
+select option {
+  font-style: normal;
+  color: var(--text-main);
+  background: white;
+  padding: 10px;
+}
+
+/* Stil za tekst koji korisnik unosi */
+input, 
+select, 
+textarea {
+  font-family: var(--font-main); /* 'Inter' font koji smo definisali */
+  font-size: 16px;              /* Standardna veličina za čitljivost bez zumiranja na mobilnim */
+  font-weight: 500;              /* Srednja debljina (Medium) da tekst izgleda "punije" */
+  color: var(--text-main);       /* Tamna boja teksta za maksimalan kontrast */
+  letter-spacing: -0.01em;       /* Blago smanjen razmak između slova za moderan "UI" izgled */
+  
+  /* Resetovanje ostalih parametara koji mogu smetati */
+  font-style: normal;            /* Osiguravamo da uneseni tekst nije italic */
+}
+
+/* Stil kada korisnik klikne (fokusira) polje */
+input:focus, 
+select:focus {
+  color: #000000;                /* Opcionalno: tekst postaje skroz crn pri kucanju */
+  border-color: var(--primary-color);
+  background-color: #ffffff;
 }
