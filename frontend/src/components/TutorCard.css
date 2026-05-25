@@ -1,0 +1,76 @@
+.tutor-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Glađa tranzicija */
+  cursor: pointer; /* Kursor se mijenja u "ruku" */
+  display: flex;
+  flex-direction: column;
+}
+
+.tutor-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: var(--primary-color); /* Suptilna promjena boje bordera na hover */
+}
+
+/* Osiguravamo da dugme unutar kartice izgleda dobro iako je sada samo vizuelni element */
+.tutor-card .btn {
+  pointer-events: none; /* Dugme propušta klik na samu karticu */
+}
+
+.tutor-image {
+  position: relative;
+  height: 180px;
+}
+
+.tutor-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tutor-rating {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  color: #f59e0b;
+  font-size: 13px;
+}
+
+.tutor-info {
+  padding: 20px;
+}
+
+.tutor-subject {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.tutor-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  height: 40px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.tutor-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+.tutor-price {
+  font-size: 15px;
+}
+

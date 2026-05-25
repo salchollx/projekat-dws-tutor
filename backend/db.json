@@ -1,0 +1,23 @@
+{
+  "users": [],
+  "tutors": [
+    {
+      "id": "1",
+      "name": "Amar Selimović",
+      "subject": "Programiranje (React, Node.js)",
+      "rating": 4.9,
+      "price": 25,
+      "description": "Student 4. godine ETF-a, pomažem sa projektima i ispitima.",
+      "image": "https://i.pravatar.cc/150?u=amar"
+    },
+    {
+      "id": "2",
+      "name": "Emina Hodžić",
+      "subject": "Matematika 1 i 2",
+      "rating": 4.8,
+      "price": 20,
+      "description": "Strpljivo objašnjavam gradivo uz mnogo riješenih primjera.",
+      "image": "https://i.pravatar.cc/150?u=emina"
+    }
+  ]
+}

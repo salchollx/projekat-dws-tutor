@@ -1,0 +1,43 @@
+.notfound-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px); /* Ostatak ekrana ispod novog Navbara */
+  text-align: center;
+  padding: 20px;
+  background: var(--bg-light);
+}
+
+.notfound-content {
+  background: white;
+  padding: 60px 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  max-width: 500px;
+  width: 100%;
+}
+
+.notfound-code {
+  font-size: 80px;
+  font-weight: 900;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.notfound-icon {
+  font-size: 50px;
+  margin-bottom: 20px;
+}
+
+.notfound-content h2 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: var(--text-main);
+}
+
+.notfound-content p {
+  color: var(--text-muted);
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
