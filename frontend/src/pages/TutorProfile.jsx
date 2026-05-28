@@ -1,21 +1,36 @@
 import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import './TutorProfile.css';
 
 export function TutorProfile() {
-  const { id } = useParams(); // Uzimamo ID iz URL-a
+  const { id } = useParams(); // Uzimamo ID iz URL-a (npr. /tutor/1)
+  const [tutor, setTutor] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Privremeni "mock" podaci dok ne uvezemo json-server
-  const tutor = {
-    id: id,
-    name: "Amar Selimović",
-    subject: "Programiranje (React, Node.js)",
-    rating: 4.9,
-    price: 25,
-    education: "Student 4. godine, Elektrotehnički fakultet Sarajevo",
-    description: "Specijalizovan sam za frontend razvoj i rad sa modernim JavaScript framework-ovima. Pomažem kolegama da savladaju osnove React-a, rad sa API-jima i state management.",
-    experience: "Preko 20 uspješnih instrukcija i 3 završena timska projekta.",
-    image: "https://i.pravatar.cc/150?u=amar"
-  };
+  useEffect(() => {
+    const fetchTutor = async () => {
+      try {
+        // Dohvatamo specifičnog tutora koristeći ID iz URL-a
+        const res = await axios.get(`http://localhost:5000/tutors/${id}`);
+        setTutor(res.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Greška pri dohvatanju profila tutora:", err);
+        setLoading(false);
+      }
+    };
+
+    fetchTutor();
+  }, [id]); // useEffect se pokreće ponovo ako se ID promijeni
+
+  if (loading) {
+    return <div className="container" style={{padding: '100px 0', textAlign: 'center'}}>Učitavanje profila...</div>;
+  }
+
+  if (!tutor) {
+    return <div className="container" style={{padding: '100px 0', textAlign: 'center'}}>Tutor nije pronađen.</div>;
+  }
 
   return (
     <div className="container tutor-profile-page">
@@ -24,13 +39,18 @@ export function TutorProfile() {
         {/* Lijeva kolona - Informacije */}
         <div className="profile-main">
           <Link to="/search" className="back-link">← Nazad na pretragu</Link>
+          
           <div className="profile-header-info">
-            <img src={tutor.image} alt={tutor.name} className="profile-img-large" />
+            <img 
+              src={tutor.image || "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
+              alt={tutor.name} 
+              className="profile-img-large" 
+            />
             <div>
               <h1>{tutor.name}</h1>
               <p className="profile-subject-tag">{tutor.subject}</p>
               <div className="profile-stats">
-                <span>⭐ {tutor.rating} (12 recenzija)</span>
+                <span>⭐ {tutor.rating || 'Nema ocjena'}</span>
                 <span>📍 Online / Uživo</span>
               </div>
             </div>
@@ -38,17 +58,17 @@ export function TutorProfile() {
 
           <div className="profile-section">
             <h3>O meni</h3>
-            <p>{tutor.description}</p>
+            <p>{tutor.description || 'Tutor još uvijek nije dodao opis.'}</p>
           </div>
 
           <div className="profile-section">
-            <h3>Obrazovanje i iskustvo</h3>
-            <p><strong>Obrazovanje:</strong> {tutor.education}</p>
-            <p><strong>Iskustvo:</strong> {tutor.experience}</p>
+            <h3>Dodatne informacije</h3>
+            <p><strong>Iskustvo:</strong> {tutor.experience || 'Informacija nije dostupna.'}</p>
+            <p><strong>Obrazovanje:</strong> {tutor.education || 'Informacija nije dostupna.'}</p>
           </div>
         </div>
 
-        {/* Desna kolona - Rezervacija (Dodatna forma - Zahtjev 2.3) */}
+        {/* Desna kolona - Rezervacija */}
         <aside className="booking-card">
           <div className="booking-header">
             <span className="price-big">{tutor.price} KM</span>
@@ -58,13 +78,18 @@ export function TutorProfile() {
           <form className="auth-form booking-form">
             <div className="input-group">
               <label className="input-label">Datum</label>
-              <input type="date" className="auth-input" />
+              <input type="date" className="auth-input" required />
             </div>
             <div className="input-group">
               <label className="input-label">Poruka za tutora</label>
-              <textarea className="auth-input" placeholder="Koji predmet/oblast vas zanima?" rows="3"></textarea>
+              <textarea 
+                className="auth-input" 
+                placeholder={`Zdravo ${tutor.name.split(' ')[0]}, trebam pomoć oko...`} 
+                rows="3"
+                required
+              ></textarea>
             </div>
-            <button type="button" className="btn btn-primary" style={{width: '100%'}}>
+            <button type="submit" className="btn btn-primary" style={{width: '100%'}}>
               Pošalji upit za termin
             </button>
           </form>

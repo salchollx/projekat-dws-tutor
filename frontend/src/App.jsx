@@ -9,13 +9,19 @@ import Contact from './pages/Contact.jsx';   // Importuj Contact
 import NotFound from './pages/NotFound.jsx'; // Importuj NotFound
 import SearchPage from './pages/SearchPage.jsx';
 import TutorProfile from './pages/TutorProfile.jsx';
+import MyProfile from './pages/MyProfile.jsx';
+import { ToastContainer } from 'react-toastify';       //Toasty
+import 'react-toastify/dist/ReactToastify.css';
+
+const defaultImage = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
 function App() {
   return (
     <Router>
       {/* Navbar je van Routes jer želimo da se vidi na svakoj stranici */}
       <NavBar />
-      
+      <ToastContainer position="top-right" autoClose={3000} />
+
       <Routes>
         {/* Definišemo da se na putanji "/" prikazuje Home komponenta */}
         <Route path="/" element={<HomePage />} />
@@ -24,6 +30,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/profile" element={<MyProfile />} />
         <Route path="/tutor/:id" element={<TutorProfile />} />
         <Route path="*" element={<NotFound />} />
         {/* Kasnije ćeš ovdje dodati npr:

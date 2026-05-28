@@ -21,7 +21,13 @@ export function NavBar() {
         <div className="nav-links">
           <NavLink to="/" className="nav-link">Početna</NavLink>
           <NavLink to="/search" className="nav-link">Pronađi tutora</NavLink>
-          
+          {user?.role === 'tutor' && (
+            <NavLink to="/profile" className="nav-link">Profil</NavLink>
+          )}
+          {user?.role === 'student' && (
+            <NavLink to="/profile" className="nav-link">Profil</NavLink>
+          )}
+
           {/* Ako je ADMIN, prikaži link za Admin Panel */}
           {user?.role === 'admin' && (
             <NavLink to="/admin" className="nav-link" style={{color: 'red'}}>Admin Panel</NavLink>
