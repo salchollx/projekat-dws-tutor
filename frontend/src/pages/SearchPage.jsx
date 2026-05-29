@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import TutorCard from '../components/TutorCard';
+import {TutorCard} from '../components/TutorCard';
 import './SearchPage.css';
 
 export function SearchPage() {
-  const [tutors, setTutors] = useState([]); // Svi tutori iz baze
-  const [filteredTutors, setFilteredTutors] = useState([]); // Ono što prikazujemo
+  const [tutors, setTutors] = useState([]); 
+  const [filteredTutors, setFilteredTutors] = useState([]); 
   const [loading, setLoading] = useState(true);
 
   // Filter states
@@ -15,35 +15,43 @@ export function SearchPage() {
 
   // 1. Dohvatanje podataka sa servera
   useEffect(() => {
-    const getTutors = async () => {
+    const fetchTutors = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/tutors');
+        setLoading(true);
+        console.log("Pozivam backend...");
+        const res = await axios.get('http://localhost:5000/api/tutors');
+        console.log("Podaci sa bekenda:", res.data);
+        
         setTutors(res.data);
-        setFilteredTutors(res.data);
-        setLoading(false);
+        setFilteredTutors(res.data); // Inicijalno prikaži sve
       } catch (err) {
-        console.error("Greška pri dohvatanju tutora:", err);
-        setLoading(false);
+        console.error("Greška pri pozivu servera:", err);
+      } finally {
+        setLoading(false); // OVO JE FALILO - prekida loading ekran
       }
     };
-    getTutors();
+    fetchTutors();
   }, []);
 
-  // 2. Logika filtriranja (pokreće se svaki put kad se promijeni neki filter)
+  // 2. Logika filtriranja
   useEffect(() => {
-    let result = tutors;
+    let result = [...tutors];
 
-    // Filtriraj po imenu ili predmetu (tekstualna pretraga)
+    // Filtriraj po imenu (iz profiles) ili predmetu
     if (searchTerm) {
-      result = result.filter(t => 
-        t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.subject.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      result = result.filter(t => {
+        const name = t.profiles?.full_name?.toLowerCase() || "";
+        const subject = t.subject?.toLowerCase() || "";
+        const search = searchTerm.toLowerCase();
+        return name.includes(search) || subject.includes(search);
+      });
     }
 
     // Filtriraj po kategoriji predmeta
     if (selectedSubject !== 'Svi predmeti') {
-      result = result.filter(t => t.subject.toLowerCase().includes(selectedSubject.toLowerCase()));
+      result = result.filter(t => 
+        t.subject?.toLowerCase().includes(selectedSubject.toLowerCase())
+      );
     }
 
     // Filtriraj po cijeni
@@ -52,11 +60,10 @@ export function SearchPage() {
     setFilteredTutors(result);
   }, [searchTerm, selectedSubject, maxPrice, tutors]);
 
-  if (loading) return <div className="container">Učitavanje tutora...</div>;
+  if (loading) return <div className="container" style={{padding: '50px', textAlign: 'center'}}>Učitavanje tutora...</div>;
 
   return (
     <div className="container search-page">
-      {/* Sidebar sa filterima */}
       <aside className="filter-sidebar">
         <h3>Filteri</h3>
         
@@ -84,14 +91,14 @@ export function SearchPage() {
             step="5"
             value={maxPrice}
             className="price-range" 
-            onChange={(e) => setMaxPrice(e.target.value)}
+            onChange={(e) => setMaxPrice(Number(e.target.value))}
           />
           <div className="range-labels"><span>0 KM</span><span>100 KM</span></div>
         </div>
 
         <button 
           className="btn" 
-          style={{width: '100%', marginTop: '20px', background: '#eee'}}
+          style={{width: '100%', marginTop: '20px', background: '#eee', color: '#333'}}
           onClick={() => {
             setSearchTerm('');
             setSelectedSubject('Svi predmeti');
@@ -102,7 +109,6 @@ export function SearchPage() {
         </button>
       </aside>
 
-      {/* Main content */}
       <main className="search-main">
         <div className="search-header">
           <input 
@@ -117,18 +123,18 @@ export function SearchPage() {
           </p>
         </div>
         
-        {filteredTutors.length > 0 ? (
-          <div className="tutor-grid">
-            {filteredTutors.map(tutor => (
+        <div className="tutors-grid">
+          {filteredTutors.length > 0 ? (
+            filteredTutors.map((tutor) => (
+              // Mapiramo filtrirane tutore, ne sve
               <TutorCard key={tutor.id} tutor={tutor} />
-            ))}
-          </div>
-        ) : (
-          <div style={{textAlign: 'center', padding: '50px'}}>
-            <h2>Nema rezultata za vašu pretragu.</h2>
-            <p>Pokušajte promijeniti filtere.</p>
-          </div>
-        )}
+            ))
+          ) : (
+            <div className="no-results">
+               <p>Nažalost, nema tutora koji odgovaraju vašoj pretrazi.</p>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );

@@ -64,25 +64,6 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// --- RUTA ZA DOBAVLJANJE TUTORA (Povezivanje tabela) ---
-app.get('/api/tutors', async (req, res) => {
-    try {
-        // Pošto nemaš ime u 'tutors', koristimo Supabase "JOIN" 
-        // da povučemo ime direktno iz 'profiles' tabele
-        const { data, error } = await supabase
-            .from('tutors')
-            .select(`
-                *,
-                profiles (full_name, avatar_url)
-            `);
-
-        if (error) throw error;
-        res.json(data);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
 // --- RUTA ZA LOGIN ---
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
@@ -124,6 +105,28 @@ app.post('/api/login', async (req, res) => {
     } catch (err) {
         console.error("Login greška:", err.message);
         res.status(500).json({ error: "Serverska greška" });
+    }
+});
+
+app.get('/api/tutors', async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('tutors')
+            .select(`
+                *,
+                profiles!tutors_user_id_fkey (
+                    full_name,
+                    role
+                )
+            `); 
+        // Napomena: !tutors_user_id_fkey je eksplicitna oznaka stranog ključa.
+        // Ako ti je lakše, probaj prvo samo: .select('*, profiles(*)')
+
+        if (error) throw error;
+        res.json(data);
+    } catch (err) {
+        console.error("Backend Error:", err.message);
+        res.status(500).json({ error: err.message });
     }
 });
 
