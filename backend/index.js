@@ -5,6 +5,10 @@ const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const supabaseAdmin = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY // Koristi service_role ključ
+);
 
 app.use(cors());
 app.use(express.json());
@@ -29,10 +33,10 @@ app.post('/api/register', async (req, res) => {
         const { error: profileError } = await supabase
             .from('profiles')
             .insert([
-                { 
-                    id: userId, 
-                    full_name: fullName, 
-                    role: role 
+                {
+                    id: userId,
+                    full_name: fullName,
+                    role: role
                 }
             ]);
 
@@ -52,7 +56,7 @@ app.post('/api/register', async (req, res) => {
                         // Ovdje NE šaljemo 'name' jer si rekao da ga nema u ovoj tabeli
                     }
                 ]);
-            
+
             if (tutorError) throw tutorError;
         }
 
@@ -110,22 +114,29 @@ app.post('/api/login', async (req, res) => {
 
 app.get('/api/tutors', async (req, res) => {
     try {
-        const { data, error } = await supabase
+        const { subject } = req.query; // Uzimamo ?subject=nešto iz URL-a
+        
+        let query = supabase
             .from('tutors')
             .select(`
                 *,
-                profiles!tutors_user_id_fkey (
+                profiles:user_id ( 
                     full_name,
-                    role
+                    avatar_url
                 )
-            `); 
-        // Napomena: !tutors_user_id_fkey je eksplicitna oznaka stranog ključa.
-        // Ako ti je lakše, probaj prvo samo: .select('*, profiles(*)')
+            `);
+
+        // Ako je korisnik nešto upisao u search, filtriraj po koloni 'subject'
+        if (subject && subject !== 'null') {
+            query = query.ilike('subject', `%${subject}%`);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
         res.json(data);
     } catch (err) {
-        console.error("Backend Error:", err.message);
+        console.error("Server Error:", err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -157,14 +168,32 @@ app.get('/api/tutors/:id', async (req, res) => {
 // 1. Slanje upita (Student šalje tutoru)
 app.post('/api/bookings', async (req, res) => {
     const { tutor_id, student_id, appointment_date, message } = req.body;
+    
+    // Loguj podatke da vidiš šta stiže sa frontenda
+    console.log("Pokušaj bookinga:", { tutor_id, student_id, appointment_date, message });
+
     try {
         const { data, error } = await supabase
             .from('bookings')
-            .insert([{ tutor_id, student_id, appointment_date, message }]);
+            .insert([
+                { 
+                    tutor_id, 
+                    student_id, 
+                    appointment_date, // PROVJERI: Da li se u bazi zove appointment_date ili booking_date?
+                    message,
+                    status: 'pending' // Eksplicitno postavi početni status
+                }
+            ])
+            .select(); // Dodaj select da vrati kreirani red
 
-        if (error) throw error;
-        res.json({ success: true, message: "Upit uspješno poslan!" });
+        if (error) {
+            console.error("Supabase Error kod inserta:", error);
+            return res.status(400).json({ error: error.message });
+        }
+
+        res.json({ success: true, data });
     } catch (err) {
+        console.error("Server Error kod bookinga:", err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -178,21 +207,19 @@ app.get('/api/dashboard/:userId', async (req, res) => {
             .from('bookings')
             .select(`
                 *,
-                student:profiles!bookings_student_id_fkey(full_name),
-                tutor:profiles!bookings_tutor_id_fkey(full_name)
+                student:student_id (full_name, avatar_url),
+                tutor:tutor_id (full_name, avatar_url)
             `)
-            // Tražimo redove gdje je korisnik ILI student ILI tutor
             .or(`tutor_id.eq.${userId},student_id.eq.${userId}`)
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error("Supabase Error:", error);
-            throw error;
+            console.error("Supabase Error u Dashboardu:", error);
+            return res.status(500).json({ error: error.message });
         }
 
         res.json(data);
     } catch (err) {
-        console.error("Server Error:", err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -223,7 +250,66 @@ app.get('/api/admin/users', async (req, res) => {
     }
 });
 
+app.delete('/api/admin/users/:id', async (req, res) => {
+    const { id } = req.params;
 
+    try {
+        // 1. Pokušaj brisanje iz Autha
+        const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);
+
+        // 2. Čak i ako Auth baci error, provjeri da li je profil obrisan
+        // (jer kaskada nekad odradi svoje prije nego što se vrati odgovor)
+        const { data: profileCheck } = await supabaseAdmin
+            .from('profiles')
+            .select('id')
+            .eq('id', id)
+            .single();
+
+        // Ako profila više nema, smatramo da je brisanje USPJELO
+        if (!profileCheck) {
+            return res.json({ success: true, message: "Korisnik uspješno uklonjen." });
+        }
+
+        if (authError) throw authError;
+
+        res.json({ success: true, message: "Korisnik obrisan." });
+
+    } catch (err) {
+        console.error("Greška pri brisanju:", err.message);
+        // Ako je korisnik već obrisan (404), nemoj slati 500 nego javi uspjeh
+        if (err.status === 404 || err.message.includes("not found")) {
+            return res.json({ success: true, message: "Korisnik već obrisan." });
+        }
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/profile/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { full_name, avatar_url, subject, price, description, role } = req.body;
+
+    try {
+        // Ažuriraj profiles tabelu
+        const { error: pErr } = await supabase
+            .from('profiles')
+            .update({ full_name, avatar_url })
+            .eq('id', userId);
+        if (pErr) throw pErr;
+
+        // Ako je tutor, ažuriraj tutors tabelu
+        if (role === 'tutor') {
+            const { error: tErr } = await supabase
+                .from('tutors')
+                .update({ subject, price, description })
+                .eq('user_id', userId);
+            if (tErr) throw tErr;
+        }
+
+        res.json({ success: true, user: { ...req.body, id: userId } });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server pokrenut na portu ${PORT}`));

@@ -1,9 +1,19 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
 
 export function HomePage() {
+  const [query, setQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    // Šaljemo ga na /search (provjeri u App.jsx da li ti je to putanja)
+    navigate(`/search?subject=${query}`);
+  };
+
   return (
     <main>
-      {/* Hero Sekcija */}
       <section className="hero-section">
         <div className="container">
           <h1 className="hero-title">Uči brže uz pomoć vršnjaka</h1>
@@ -11,21 +21,21 @@ export function HomePage() {
             Pronađi studente koji ti mogu pomoći sa programiranjem, matematikom ili dizajnom.
           </p>
 
-          {/* Search Bar */}
-          <div className="search-container">
+          <form className="search-container" onSubmit={handleSearch}>
             <input 
               type="text" 
               placeholder="Šta želiš da naučiš? (npr. React, SQL...)" 
               className="search-input"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
             />
-            <button className="btn btn-primary" style={{ borderRadius: '0 8px 8px 0' }}>
+            <button type="submit" className="btn btn-primary" style={{ borderRadius: '0 8px 8px 0' }}>
               Pretraži
             </button>
-          </div>
+          </form>
         </div>
       </section>
 
-      {/* Info Sekcija */}
       <section className="container info-section">
         <h2 className="info-title">Zašto Peer Tutoring?</h2>
         <div className="info-grid">

@@ -1,33 +1,32 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { createClient } from '@supabase/supabase-js';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import './Auth.css';
 
+const supabase = createClient('https://sputulxymzyxngigzega.supabase.co', 'SUPABASE_KEY');
+
 export function MyProfile() {
   const { user, login } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
-    email: '',
-    image: '',
+    avatarUrl: '',
     subject: '',
     price: '',
-    description: '',
-    role: ''
+    description: ''
   });
 
-  // Učitavanje podataka čim se komponenta pokrene
   useEffect(() => {
     if (user) {
       setFormData({
-        fullName: user.fullName || '',
-        email: user.email || '',
-        image: user.image || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-        subject: user.subject || '',
-        price: user.price || '',
-        description: user.description || '',
-        role: user.role || ''
+        fullName: user.full_name || '',
+        avatarUrl: user.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+        subject: user.tutor_data?.subject || '',
+        price: user.tutor_data?.price || '',
+        description: user.tutor_data?.description || ''
       });
     }
   }, [user]);
@@ -37,57 +36,68 @@ export function MyProfile() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // ... unutar MyProfile komponente, iznad handleSave funkcije dodaj ovo:
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-const handleImageChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    // Provjera veličine fajla (opciono, npr. max 2MB)
     if (file.size > 2000000) {
       return toast.error("Slika je prevelika! Maksimalno 2MB.");
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      // Ovo pretvara sliku u Base64 string
-      setFormData(prev => ({ ...prev, image: reader.result }));
-    };
-    reader.readAsDataURL(file);
-  }
-};
+    // Za preview odmah na frontendu koristimo privremeni URL
+    const previewUrl = URL.createObjectURL(file);
+    setFormData(prev => ({ ...prev, avatarUrl: previewUrl, rawFile: file }));
+  };
 
-// ...
   const handleSave = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
-      // 1. Ažuriramo glavnu tabelu 'users'
-      const updatedUser = { ...user, ...formData };
-      await axios.put(`http://localhost:5000/users/${user.id}`, updatedUser);
-      
-      // 2. Ako je korisnik tutor, ažuriramo i 'tutors' tabelu
-      if (user.role === 'tutor') {
-        const tutorRes = await axios.get(`http://localhost:5000/tutors?userId=${user.id}`);
-        if (tutorRes.data.length > 0) {
-          const tutorId = tutorRes.data[0].id;
-          const updatedTutor = {
-            ...tutorRes.data[0],
-            name: formData.fullName,
-            image: formData.image,
-            subject: formData.subject,
-            price: Number(formData.price),
-            description: formData.description
-          };
-          await axios.put(`http://localhost:5000/tutors/${tutorId}`, updatedTutor);
-        }
+      let finalAvatarUrl = formData.avatarUrl;
+
+      // 1. Ako imamo novi fajl (rawFile), šaljemo ga u Bucket
+      if (formData.rawFile) {
+        const file = formData.rawFile;
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}-${Math.random()}.${fileExt}`; // Unikatan naziv
+        const filePath = `${fileName}`;
+
+        // Upload u bucket 'avatars'
+        let { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        // Uzmi javni URL slike
+        const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+
+        finalAvatarUrl = publicUrl;
       }
 
-      // 3. Ažuriramo lokalni state i Context
-      login(updatedUser); 
+      // 2. Sada šaljemo URL i ostale podatke tvom backendu da osvježi bazu
+      const updateData = {
+        full_name: formData.fullName,
+        avatar_url: finalAvatarUrl,
+        role: user.role,
+        subject: formData.subject,
+        price: formData.price,
+        description: formData.description
+      };
+
+      const response = await axios.put(`http://localhost:5000/api/profile/${user.id}`, updateData);
+
+      login(response.data.user);
       setIsEditing(false);
       toast.success("Profil uspješno ažuriran!");
     } catch (error) {
-      console.error(error);
-      toast.error("Greška prilikom spašavanja podataka.");
+      console.error("Greška:", error);
+      toast.error("Neuspješan upload ili spašavanje.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,102 +106,46 @@ const handleImageChange = (e) => {
   return (
     <div className="container" style={{ padding: '40px 20px', maxWidth: '800px' }}>
       <div className="auth-card" style={{ maxWidth: '100%' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Moj Profil</h2>
 
         <form className="auth-form" onSubmit={handleSave}>
-
-          {/* Zamijeni stari input za URL slike ovim */}
-        <div className="input-group" style={{ alignItems: 'center' }}>
-        <label className="input-label">Profilna fotografija</label>
-  
-            <div style={{ position: 'relative', cursor: isEditing ? 'pointer' : 'default' }}>
-            <img 
-              src={formData.image || "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
-              alt="Profilna" 
-              style={{ 
-              width: '150px', 
-                height: '150px', 
-                borderRadius: '50%', 
-                objectFit: 'cover', 
-                border: '4px solid var(--primary-color)',
-                opacity: isEditing ? 0.7 : 1
-              }} 
+          <div className="input-group" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div
+              style={{ position: 'relative', cursor: isEditing ? 'pointer' : 'default' }}
               onClick={() => isEditing && document.getElementById('fileInput').click()}
-            />
-            {isEditing && (
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                pointerEvents: 'none',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                textAlign: 'center'
-              }}>
-                KLIKNI ZA IZMJENU
-              </div>
-         )}
-         </div>
-
-         <input 
-           id="fileInput"
-           type="file"
-           accept="image/*"
-           style={{ display: 'none' }}
-           onChange={handleImageChange}
-           disabled={!isEditing}
-         />
-         <small style={{ color: 'var(--text-muted)', marginTop: '5px' }}>
-           Preporučeno: Kvadratna slika, max 2MB.
-         </small>
-        </div>
+            >
+              <img
+                src={formData.avatarUrl}
+                alt="Profilna"
+                style={{
+                  width: '150px', height: '150px', borderRadius: '50%',
+                  objectFit: 'cover', border: '4px solid var(--primary-color)',
+                  opacity: isEditing ? 0.7 : 1, transition: '0.3s'
+                }}
+              />
+              {isEditing && <div className="upload-overlay">PROMIJENI SLIKU</div>}
+            </div>
+            <input id="fileInput" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageChange} />
+          </div>
 
           <div className="input-group">
             <label className="input-label">Ime i prezime</label>
-            <input 
-              name="fullName"
-              className="auth-input" 
-              value={formData.fullName} 
-              onChange={handleChange} 
-              disabled={!isEditing} 
-            />
+            <input name="fullName" className="auth-input" value={formData.fullName} onChange={handleChange} disabled={!isEditing} />
           </div>
 
           {user.role === 'tutor' && (
             <>
               <div className="input-group">
                 <label className="input-label">Predmet/Vještina</label>
-                <input 
-                  name="subject"
-                  className="auth-input" 
-                  value={formData.subject} 
-                  onChange={handleChange} 
-                  disabled={!isEditing} 
-                  placeholder="npr. Matematika, React, Engleski..."
-                />
+                <input name="subject" className="auth-input" value={formData.subject} onChange={handleChange} disabled={!isEditing} />
               </div>
               <div className="input-group">
                 <label className="input-label">Cijena po satu (KM)</label>
-                <input 
-                  name="price"
-                  type="number"
-                  className="auth-input" 
-                  value={formData.price} 
-                  onChange={handleChange} 
-                  disabled={!isEditing} 
-                />
+                <input name="price" type="number" className="auth-input" value={formData.price} onChange={handleChange} disabled={!isEditing} />
               </div>
               <div className="input-group">
-                <label className="input-label">Kratka biografija</label>
-                <textarea 
-                  name="description"
-                  className="auth-input" 
-                  value={formData.description} 
-                  onChange={handleChange} 
-                  disabled={!isEditing}
-                  rows="4"
-                  style={{resize: 'none'}}
-                />
+                <label className="input-label">Biografija</label>
+                <textarea name="description" className="auth-input" value={formData.description} onChange={handleChange} disabled={!isEditing} rows="4" />
               </div>
             </>
           )}
@@ -199,25 +153,15 @@ const handleImageChange = (e) => {
           <div style={{ marginTop: '20px' }}>
             {isEditing ? (
               <div style={{ display: 'flex', gap: '15px' }}>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
-                  Sačuvaj promjene
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>
+                  {loading ? 'Spašavanje...' : 'Sačuvaj promjene'}
                 </button>
-                <button 
-                  type="button" 
-                  className="btn" 
-                  onClick={() => setIsEditing(false)} 
-                  style={{ flex: 1, background: '#eee', color: '#333' }}
-                >
+                <button type="button" className="btn" onClick={() => setIsEditing(false)} style={{ flex: 1, background: '#ccc' }}>
                   Odustani
                 </button>
               </div>
             ) : (
-              <button 
-                type="button" 
-                className="btn btn-primary" 
-                style={{ width: '100%' }}
-                onClick={() => setIsEditing(true)}
-              >
+              <button type="button" className="btn btn-primary" style={{ width: '100%' }} onClick={() => setIsEditing(true)}>
                 Uredi profil
               </button>
             )}

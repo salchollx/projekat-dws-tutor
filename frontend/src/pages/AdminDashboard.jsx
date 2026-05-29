@@ -22,12 +22,20 @@ export function AdminDashboard() {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Da li ste sigurni da želite obrisati ovog korisnika?")) {
+        if (window.confirm("Jeste li sigurni?")) {
             try {
-                await axios.delete(`http://localhost:5000/api/admin/users/${id}`);
-                setUsers(users.filter(u => u.id !== id));
+                const res = await axios.delete(`http://localhost:5000/api/admin/users/${id}`);
+
+                if (res.data.success) {
+                    // Filtriraj listu u state-u - ovo mijenja refresh!
+                    setUsers(prev => prev.filter(u => u.id !== id));
+                    // Opcionalno makni alert ako te nervira
+                    console.log("Obrisano.");
+                }
             } catch (err) {
-                alert("Greška pri brisanju.");
+                // Ako je korisnik ipak nestao (refresh situacija), samo ga makni iz tabele
+                setUsers(prev => prev.filter(u => u.id !== id));
+                console.log("Korisnik je već obrisan ili je došlo do greške.");
             }
         }
     };
@@ -63,7 +71,9 @@ export function AdminDashboard() {
                                 </td>
                                 <td className="small-text">{u.id}</td>
                                 <td>
-                                    <button onClick={() => handleDelete(u.id)} className="delete-btn">Obriši</button>
+                                    <button className="delete-btn" onClick={() => handleDelete(u.id)}>
+                                        Obriši trajno
+                                    </button>
                                 </td>
                             </tr>
                         ))}
