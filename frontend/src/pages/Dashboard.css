@@ -1,0 +1,32 @@
+.dash-container { max-width: 1000px; margin: 50px auto; padding: 0 20px; font-family: 'Inter', sans-serif; }
+.dash-header { border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 40px; }
+.dash-header h1 { color: #1a202c; font-size: 2rem; margin: 0; }
+.dash-header p { color: #718096; margin-top: 5px; }
+
+.dash-section { margin-bottom: 60px; }
+.section-title { font-size: 1.25rem; color: #2d3748; margin-bottom: 20px; display: flex; align-items: center; }
+.archive-title { color: #718096; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+.card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden; transition: 0.3s; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+
+.card-body { padding: 20px; }
+.card-body h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #1a202c; }
+.date { color: #4a5568; font-size: 0.9rem; margin-bottom: 15px; }
+
+.msg-box { background: #f7fafc; padding: 12px; border-radius: 8px; font-style: italic; color: #4a5568; font-size: 0.9rem; }
+
+.card-footer { display: flex; gap: 10px; padding: 15px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; }
+
+.btn-accept { flex: 1; background: #38a169; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+.btn-reject { flex: 1; background: #e53e3e; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+
+.status-badge { font-size: 0.7rem; font-weight: bold; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; margin-left: 10px; }
+.status-badge.accepted { background: #c6f6d5; color: #22543d; }
+.status-badge.rejected { background: #fed7d7; color: #822727; }
+
+.mini-card { opacity: 0.85; }
+.small-date { font-size: 0.8rem; color: #a0aec0; margin-top: 5px; }
+.empty-text { color: #a0aec0; font-style: italic; }

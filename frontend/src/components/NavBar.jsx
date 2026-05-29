@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Importuj hook
+import { useAuth } from '../context/AuthContext';
 import './NavBar.css';
 
 export function NavBar() {
@@ -21,22 +21,35 @@ export function NavBar() {
         <div className="nav-links">
           <NavLink to="/" className="nav-link">Početna</NavLink>
           <NavLink to="/search" className="nav-link">Pronađi tutora</NavLink>
-          {user?.role === 'tutor' && (
-            <NavLink to="/profile" className="nav-link">Profil</NavLink>
-          )}
-          {user?.role === 'student' && (
-            <NavLink to="/profile" className="nav-link">Profil</NavLink>
-          )}
 
-          {/* Ako je ADMIN, prikaži link za Admin Panel */}
-          {user?.role === 'admin' && (
-            <NavLink to="/admin" className="nav-link" style={{color: 'red'}}>Admin Panel</NavLink>
+          {/* 1. LINKOVI ZA ULOGOVANE KORISNIKE */}
+          {user && (
+            <>
+              {/* Ako NIJE admin, prikaži Dashboard (Tutor Panel ili Moji Upiti) */}
+              {user.role !== 'admin' && (
+                <>
+                  <NavLink to="/dashboard" className="nav-link">
+                    {user.role === 'tutor' ? 'Tutor Panel' : 'Moji Upiti'}
+                  </NavLink>
+                  <NavLink to="/profile" className="nav-link">Profil</NavLink>
+                </>
+              )}
+
+              {/* Ako JE admin, prikaži SAMO Admin Panel */}
+              {user.role === 'admin' && (
+                <NavLink to="/admin-dashboard" className="nav-link admin-link">
+                  🛡️ Admin Panel
+                </NavLink>
+              )}
+            </>
           )}
 
           <div className="nav-auth-btns">
             {user ? (
               <>
-                <span className="user-name">Zdravo, {user.fullName.split(' ')[0]}</span>
+                <span className="user-name">
+                  Zdravo, {user.fullName ? user.fullName.split(' ')[0] : 'Korisniče'}
+                </span>
                 <button onClick={handleLogout} className="btn-login">Odjavi se</button>
               </>
             ) : (

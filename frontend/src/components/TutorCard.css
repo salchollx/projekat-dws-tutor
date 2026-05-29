@@ -1,76 +1,114 @@
 .tutor-card {
   background: white;
-  border-radius: 16px;
-  border: 1px solid var(--border-color);
+  border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Glađa tranzicija */
-  cursor: pointer; /* Kursor se mijenja u "ruku" */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
+  height: 100%; /* Ovo osigurava da su sve u redu iste visine */
+  border: 1px solid #f0f0f0;
 }
 
 .tutor-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  border-color: var(--primary-color); /* Suptilna promjena boje bordera na hover */
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
 }
 
-/* Osiguravamo da dugme unutar kartice izgleda dobro iako je sada samo vizuelni element */
-.tutor-card .btn {
-  pointer-events: none; /* Dugme propušta klik na samu karticu */
-}
-
-.tutor-image {
+.tutor-image-container {
   position: relative;
-  height: 180px;
+  width: 100%;
+  padding-top: 75%; /* Odnos širine i visine slike (4:3) */
+  background: #f8f9fa;
 }
 
-.tutor-image img {
+.tutor-card-img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* Ključno: slika se ne rasteže, već se "cropuje" */
 }
 
 .tutor-rating {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  bottom: 10px;
+  right: 10px;
   background: rgba(255, 255, 255, 0.9);
-  padding: 4px 10px;
+  padding: 4px 8px;
   border-radius: 20px;
-  font-weight: 700;
-  color: #f59e0b;
-  font-size: 13px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: #ffc107;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.tutor-info {
-  padding: 20px;
+.tutor-content {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Gura footer na dno */
 }
 
-.tutor-subject {
-  color: var(--primary-color);
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 10px;
-}
-
-.tutor-desc {
-  font-size: 14px;
-  color: var(--text-muted);
-  height: 40px;
+.tutor-header-main h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+  white-space: nowrap;
   overflow: hidden;
-  margin-bottom: 20px;
+  text-overflow: ellipsis; /* Skraćuje preduga imena sa tri tačke */
 }
 
-.tutor-footer {
+.tutor-subject-badge {
+  display: inline-block;
+  background: #eef2ff;
+  color: #4f46e5;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 5px;
+}
+
+.tutor-description-text {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 12px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Ograničava opis na tačno 2 reda */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.tutor-card-footer {
+  margin-top: auto; /* Gura ovaj dio na dno kartice */
+  padding-top: 15px;
+  border-top: 1px solid #f0f0f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 15px;
-  border-top: 1px solid var(--border-color);
 }
 
-.tutor-price {
-  font-size: 15px;
+.price-amount {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d3436;
 }
 
+.price-unit {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.view-profile-btn {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}

@@ -3,6 +3,14 @@ import axios from 'axios';
 import {TutorCard} from '../components/TutorCard';
 import './SearchPage.css';
 
+const SUBJECT_CATEGORIES = {
+  'Svi predmeti': [],
+  'Programiranje': ['React', 'Node.js', 'Python', 'JavaScript', 'C++', 'Java'],
+  'Matematika': ['Linearna algebra', 'Matematika 1', 'Matematika 2', 'Statistika', 'Diskretna matematika'],
+  'Jezici': ['Engleski', 'Njemački', 'Francuski', 'Španski'],
+  'Dizajn': ['UI/UX', 'Photoshop', 'Illustrator', 'Figma']
+};
+
 export function SearchPage() {
   const [tutors, setTutors] = useState([]); 
   const [filteredTutors, setFilteredTutors] = useState([]); 
@@ -10,9 +18,55 @@ export function SearchPage() {
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState('Svi predmeti');
   const [maxPrice, setMaxPrice] = useState(100);
 
+  // Unutar SearchPage komponente
+const [selectedSubject, setSelectedSubject] = useState('Svi predmeti');
+const [selectedSubCategory, setSelectedSubCategory] = useState('Sve'); // NOVO
+
+// Resetuj podkategoriju svaki put kad se promijeni glavni predmet
+useEffect(() => {
+  setSelectedSubCategory('Sve');
+}, [selectedSubject]);
+
+// 2. Logika filtriranja
+useEffect(() => {
+  let result = [...tutors];
+
+  // Filter 1: Tekstualna pretraga (Ime ili bilo šta u opisu/predmetu)
+  if (searchTerm) {
+    result = result.filter(t => {
+      const name = t.profiles?.full_name?.toLowerCase() || "";
+      const subject = t.subject?.toLowerCase() || "";
+      const desc = t.description?.toLowerCase() || "";
+      const search = searchTerm.toLowerCase();
+      return name.includes(search) || subject.includes(search) || desc.includes(search);
+    });
+  }
+
+  // Filter 2: Glavni predmet
+  if (selectedSubject !== 'Svi predmeti') {
+    result = result.filter(t => 
+      t.subject?.toLowerCase().includes(selectedSubject.toLowerCase())
+    );
+  }
+
+  // Filter 3: Podkategorija (Gledamo da li se podkategorija nalazi u opisu ili nazivu predmeta)
+  if (selectedSubCategory !== 'Sve') {
+    result = result.filter(t => {
+      const sub = selectedSubCategory.toLowerCase();
+      return (
+        t.subject?.toLowerCase().includes(sub) || 
+        t.description?.toLowerCase().includes(sub)
+      );
+    });
+  }
+
+  // Filter 4: Cijena
+  result = result.filter(t => t.price <= maxPrice);
+
+  setFilteredTutors(result);
+}, [searchTerm, selectedSubject, selectedSubCategory, maxPrice, tutors]);
   // 1. Dohvatanje podataka sa servera
   useEffect(() => {
     const fetchTutors = async () => {
@@ -68,19 +122,34 @@ export function SearchPage() {
         <h3>Filteri</h3>
         
         <div className="filter-group">
-          <label>Predmet</label>
-          <select 
-            className="auth-select" 
-            value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
-          >
-            <option>Svi predmeti</option>
-            <option>Programiranje</option>
-            <option>Matematika</option>
-            <option>Jezici</option>
-            <option>Dizajn</option>
-          </select>
-        </div>
+  <label>Glavna oblast</label>
+  <select 
+    className="auth-select" 
+    value={selectedSubject}
+    onChange={(e) => setSelectedSubject(e.target.value)}
+  >
+    {Object.keys(SUBJECT_CATEGORIES).map(cat => (
+      <option key={cat} value={cat}>{cat}</option>
+    ))}
+  </select>
+</div>
+
+{/* DINAMIČKI FILTER ZA PODKATEGORIJE */}
+{selectedSubject !== 'Svi predmeti' && SUBJECT_CATEGORIES[selectedSubject].length > 0 && (
+  <div className="filter-group animate-fade-in">
+    <label>Specifična oblast / Modul</label>
+    <select 
+      className="auth-select sub-category-select" 
+      value={selectedSubCategory}
+      onChange={(e) => setSelectedSubCategory(e.target.value)}
+    >
+      <option value="Sve">Sve iz oblasti {selectedSubject}</option>
+      {SUBJECT_CATEGORIES[selectedSubject].map(sub => (
+        <option key={sub} value={sub}>{sub}</option>
+      ))}
+    </select>
+  </div>
+)}
 
         <div className="filter-group">
           <label>Maksimalna cijena: <span style={{color: 'var(--primary-color)'}}>{maxPrice} KM</span></label>

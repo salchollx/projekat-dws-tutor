@@ -130,6 +130,101 @@ app.get('/api/tutors', async (req, res) => {
     }
 });
 
+app.get('/api/tutors/:id', async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('tutors')
+            .select(`
+                *,
+                profiles:user_id (
+                    full_name,
+                    avatar_url
+                )
+            `)
+            .eq('user_id', req.params.id) // Tražimo po user_id jer to šalje URL
+            .single();
+
+        if (error) throw error;
+        if (!data) return res.status(404).json({ error: "Tutor nije pronađen" });
+
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+// 1. Slanje upita (Student šalje tutoru)
+app.post('/api/bookings', async (req, res) => {
+    const { tutor_id, student_id, appointment_date, message } = req.body;
+    try {
+        const { data, error } = await supabase
+            .from('bookings')
+            .insert([{ tutor_id, student_id, appointment_date, message }]);
+
+        if (error) throw error;
+        res.json({ success: true, message: "Upit uspješno poslan!" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 2. Dohvatanje upita za ulogovanog tutora
+// 1. Svi upiti vezani za korisnika (i oni koje je primio i koje je poslao)
+app.get('/api/dashboard/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { data, error } = await supabase
+            .from('bookings')
+            .select(`
+                *,
+                student:profiles!bookings_student_id_fkey(full_name),
+                tutor:profiles!bookings_tutor_id_fkey(full_name)
+            `)
+            // Tražimo redove gdje je korisnik ILI student ILI tutor
+            .or(`tutor_id.eq.${userId},student_id.eq.${userId}`)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error("Supabase Error:", error);
+            throw error;
+        }
+
+        res.json(data);
+    } catch (err) {
+        console.error("Server Error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 2. Update statusa (Prihvati/Odbij)
+app.patch('/api/bookings/:id/status', async (req, res) => {
+    try {
+        const { status } = req.body;
+        const { data, error } = await supabase
+            .from('bookings')
+            .update({ status })
+            .eq('id', req.params.id);
+
+        if (error) throw error;
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/admin/users', async (req, res) => {
+    try {
+        const { data, error } = await supabase.from('profiles').select('*');
+        if (error) throw error;
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server pokrenut na portu ${PORT}`));
 

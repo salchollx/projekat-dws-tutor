@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './TutorCard.css';
 
+
 export function TutorCard({ tutor }) {
   const navigate = useNavigate();
 
@@ -21,31 +22,32 @@ export function TutorCard({ tutor }) {
   const imageUrl = tutor.profiles?.avatar_url || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
   return (
-    <div className="tutor-card" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
-      <div className="tutor-image">
-        <img src={imageUrl} alt={fullName} />
-        <span className="tutor-rating">★ {tutor.rating || '5.0'}</span>
-      </div>
-      
-      <div className="tutor-info">
-        <h3>{fullName}</h3>
-        <p className="tutor-subject">{tutor.subject || "Opšti predmeti"}</p>
-        
-        {/* Skraćujemo opis ako je predugačak da ne kvari dizajn kartice */}
-        <p className="tutor-desc">
-          {tutor.description && tutor.description.length > 100 
-            ? `${tutor.description.substring(0, 100)}...` 
-            : tutor.description || "Nema opisa."}
-        </p>
-
-        <div className="tutor-footer">
-          <span className="tutor-price">
-            <strong>{tutor.price || 0} KM</strong>/h
-          </span>
-          <button className="btn btn-primary btn-sm">Pogledaj profil</button>
-        </div>
-      </div>
+    // ... unutar return-a TutorCard komponente
+<div className="tutor-card" onClick={handleCardClick}>
+  <div className="tutor-image-container">
+    <img src={imageUrl} alt={fullName} className="tutor-card-img" />
+    <span className="tutor-rating">★ {tutor.rating || '5.0'}</span>
+  </div>
+  
+  <div className="tutor-content">
+    <div className="tutor-header-main">
+      <h3>{fullName}</h3>
+      <p className="tutor-subject-badge">{tutor.subject}</p>
     </div>
+    
+    <p className="tutor-description-text">
+      {tutor.description}
+    </p>
+
+    <div className="tutor-card-footer">
+      <div className="tutor-price-tag">
+        <span className="price-amount">{tutor.price || 0} KM</span>
+        <span className="price-unit">/h</span>
+      </div>
+      <button className="view-profile-btn">Profil</button>
+    </div>
+  </div>
+</div>
   );
 }
 
