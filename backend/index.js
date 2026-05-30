@@ -289,23 +289,64 @@ app.put('/api/profile/:userId', async (req, res) => {
     const { full_name, avatar_url, subject, price, description, role } = req.body;
 
     try {
-        // Ažuriraj profiles tabelu
-        const { error: pErr } = await supabase
+        // 1. Update tabele 'profiles' (ovo ti radi)
+        const { error: profileError } = await supabase
             .from('profiles')
-            .update({ full_name, avatar_url })
+            .update({ 
+                full_name: full_name, 
+                avatar_url: avatar_url 
+            })
             .eq('id', userId);
-        if (pErr) throw pErr;
 
-        // Ako je tutor, ažuriraj tutors tabelu
+        if (profileError) throw profileError;
+
+        // 2. Update tabele 'tutors' (Ovdje je vjerovatno bio problem)
         if (role === 'tutor') {
-            const { error: tErr } = await supabase
+            const { error: tutorError } = await supabase
                 .from('tutors')
-                .update({ subject, price, description })
-                .eq('user_id', userId);
-            if (tErr) throw tErr;
+                .update({ 
+                    subject: subject, 
+                    price: Number(price), // Obavezno pretvori u broj
+                    description: description 
+                })
+                .eq('user_id', userId); // Provjeri zove li se kolona user_id!
+
+            if (tutorError) throw tutorError;
         }
 
-        res.json({ success: true, user: { ...req.body, id: userId } });
+        // 3. Dohvati skroz svježe podatke sa JOIN-om da vratiš frontendu
+        const { data: updatedUser, error: fetchError } = await supabase
+            .from('profiles')
+            .select(`
+                *,
+                tutor_data:tutors(*)
+            `)
+            .eq('id', userId)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        // Vraćamo finalni objekt
+        res.json({ success: true, user: updatedUser });
+        
+    } catch (err) {
+        console.error("Greška na serveru:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Brisanje profila
+app.delete('/api/profile/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
+        // Zahvaljujući CASCADE, brišemo samo iz profiles, a tutors odlazi sam
+        const { error } = await supabase
+            .from('profiles')
+            .delete()
+            .eq('id', userId);
+
+        if (error) throw error;
+        res.json({ success: true, message: "Korisnik uspješno obrisan" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

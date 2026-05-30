@@ -44,6 +44,9 @@ export function NavBar() {
             </>
           )}
 
+          <NavLink to="/about" className="nav-link">About</NavLink>
+          <NavLink to="/contact" className="nav-link">Kontakt</NavLink>
+          
           <div className="nav-auth-btns">
             {user ? (
               <>
