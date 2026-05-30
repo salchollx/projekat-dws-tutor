@@ -5,9 +5,9 @@ Full-stack aplikacija razvijena kao projektno rješenje koje omogućava digitaln
 
 ### 🚀 **Produkcijski URL-ovi (Live verzija)**
 
-*   **Frontend aplikacija:** \[OVDJE\_ZALIJEPI\_VERCEL\_LINK\]
+*   **Frontend aplikacija:** https://peertutor-pi.vercel.app/
     
-*   **Backend API:** \[OVDJE\_ZALIJEPI\_RENDER\_LINK\]
+*   **Backend API:** https://peertutor-n61w.onrender.com
     
 
 ### 💻 **Upute za lokalno pokretanje**
@@ -21,7 +21,7 @@ Full-stack aplikacija razvijena kao projektno rješenje koje omogućava digitaln
 
 #### **🛠️ Instalacija i pokretanje**
 
-1.  git clone \[LINK\_TVOG\_GITHUB\_REPOZITORIJA\]
+1.  git clone https://github.com/salchollx/projekat-dws-tutor.git
     
 2.  **Postavke Backend-a:**
     
