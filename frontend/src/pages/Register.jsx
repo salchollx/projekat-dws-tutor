@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api';
 import { toast } from 'react-toastify';
 import './Auth.css';
 
@@ -35,7 +35,7 @@ export function Register() {
   try {
     // 2. Šaljemo JEDAN zahtjev našem Node.js serveru
     // On će u sebi sadržavati sve podatke, a server će znati šta s njima
-    const response = await axios.post('http://localhost:5000/api/register', {
+    const response = await API.post('/register', {
       email: formData.email,
       password: formData.password,
       fullName: formData.fullName,

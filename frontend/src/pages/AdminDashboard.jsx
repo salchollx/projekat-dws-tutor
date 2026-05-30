@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../api';
 import './AdminDashboard.css';
 
 export function AdminDashboard() {
@@ -12,7 +12,7 @@ export function AdminDashboard() {
 
     const fetchUsers = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/admin/users');
+            const res = await API.get('/admin/users');
             setUsers(res.data);
         } catch (err) {
             console.error("Greška pri dohvatanju korisnika");
@@ -24,7 +24,7 @@ export function AdminDashboard() {
     const handleDelete = async (id) => {
         if (window.confirm("Jeste li sigurni?")) {
             try {
-                const res = await axios.delete(`http://localhost:5000/api/admin/users/${id}`);
+                const res = await API.delete(`/admin/users/${id}`);
 
                 if (res.data.success) {
                     // Filtriraj listu u state-u - ovo mijenja refresh!

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../api';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 
@@ -11,7 +11,7 @@ export function Dashboard() {
     const fetchBookings = async () => {
         if (!user) return;
         try {
-            const res = await axios.get(`http://localhost:5000/api/dashboard/${user.id}`);
+            const res = await API.get(`/dashboard/${user.id}`);
             console.log("PODACI KOJI SU STIGLI:", res.data); // OVO DODAJ
             setBookings(res.data);
         } catch (err) {
@@ -25,7 +25,7 @@ export function Dashboard() {
 
     const updateStatus = async (id, newStatus) => {
         try {
-            await axios.patch(`http://localhost:5000/api/bookings/${id}/status`, { status: newStatus });
+            await API.patch(`/bookings/${id}/status`, { status: newStatus });
             // Odmah osvježi listu lokalno
             setBookings(prev => prev.map(b => b.id === id ? { ...b, status: newStatus } : b));
         } catch (err) {

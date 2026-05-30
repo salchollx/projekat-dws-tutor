@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { createClient } from '@supabase/supabase-js';
-import axios from 'axios';
+import API from '../api';
 import { toast } from 'react-toastify';
 import './MyProfile.css';
 
@@ -72,7 +72,7 @@ export function MyProfile() {
       }
 
       // 2. Slanje podataka backendu
-      const res = await axios.put(`http://localhost:5000/api/profile/${user.id}`, {
+      const res = await API.put(`/profile/${user.id}`, {
         full_name: formData.full_name,
         avatar_url: finalUrl,
         subject: formData.subject,
@@ -98,7 +98,7 @@ export function MyProfile() {
   const handleDeleteAccount = async () => {
     if (window.confirm("Jeste li sigurni? Ova akcija će trajno obrisati vaš račun.")) {
       try {
-        await axios.delete(`http://localhost:5000/api/profile/${user.id}`);
+        await API.delete(`/profile/${user.id}`);
         toast.info("Račun obrisan.");
         logout();
       } catch (err) {

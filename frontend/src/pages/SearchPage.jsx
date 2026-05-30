@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api';
 import TutorCard from '../components/TutorCard';
 import './SearchPage.css';
 
@@ -39,7 +39,7 @@ export function SearchPage() {
     const fetchTutors = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:5000/api/tutors');
+        const res = await API.get('/tutors');
         setTutors(res.data);
         setFilteredTutors(res.data);
       } catch (err) {
