@@ -130,12 +130,14 @@ Full-stack aplikacija razvijena kao projektno rješenje koje omogućava digitaln
 
 ### 📸 **Snimci ekrana (Screenshots)**
 
-1.  **Početna stranica**
-    
-2.  **Autentifikacija**
-    
+1.  **Početna stranica** 
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/fa8908f9-18cd-47f8-96da-4c8ce9a351d9" />
+
+2.  **Autentifikacija** 
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/1d1e3051-23ca-4d9b-804f-889549052e5c" />
+
 3.  **Profil korisnika**
-    
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/833bee41-e5d5-4919-89e8-77c3823f0b15" />
+
 4.  **Pretraga tutora**
-    
-5.  **Mobilna verzija**
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/fbca9366-8e6b-46b9-99d7-c902891edc5b" />
